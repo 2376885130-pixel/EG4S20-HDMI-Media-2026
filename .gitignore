@@ -1,0 +1,79 @@
+# ========================================
+# OS
+# ========================================
+
+.DS_Store
+Thumbs.db
+
+# ========================================
+# Editors
+# ========================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================================
+# Temporary Files
+# ========================================
+
+*.tmp
+*.bak
+*.old
+*.orig
+
+# ========================================
+# Logs
+# ========================================
+
+*.log
+
+# ========================================
+# Python
+# ========================================
+
+__pycache__/
+*.pyc
+
+# ========================================
+# Generic Build Directories
+# ========================================
+
+build/
+tmp/
+temp/
+.cache/
+
+# ========================================
+# Simulation Output
+# ========================================
+
+*.vcd
+*.fst
+*.wlf
+
+# ========================================
+# Generated FPGA Binary Output
+# ========================================
+
+*.bit
+*.bin
+
+# ========================================
+# IMPORTANT
+# ========================================
+
+# Do NOT blindly add Anlogic/TD file extensions here.
+#
+# After importing the official project:
+#
+# 1. inspect git status
+# 2. identify source files
+# 3. identify generated files
+# 4. ignore only confirmed generated artifacts
+#
+# Project files, constraints, IP configuration,
+# and reproducibility-critical files should not
+# be ignored without review.
