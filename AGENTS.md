@@ -263,7 +263,55 @@ Long-term Stable
 
 ---
 
-## 12. Core Engineering Principle
+## 12. RTL Verification Requirements
+
+所有 RTL 功能修改完成后，必须参考：
+
+docs/RTL_VERIFICATION_PROTOCOL.md
+
+并执行与修改范围相适用的验证。
+
+至少考虑：
+
+- Verilator strict lint
+- existing directed simulation
+- Icarus cross-simulation where applicable
+- random and boundary tests where applicable
+- independent Python Golden Reference where applicable
+- Yosys synthesis sanity where supported
+- TangDynasty vendor implementation when appropriate
+
+必须明确区分并报告各阶段证据。
+
+任何未实际执行的阶段必须写：
+
+NOT VERIFIED
+
+禁止 AI / Agent 仅凭代码阅读宣布：
+
+- LINT PASS
+- SIMULATION PASS
+- SYNTHESIS PASS
+- TIMING PASS
+- HARDWARE PASS
+
+禁止为了让测试通过而修改正确的 Testbench、删除失败测试、降低 Assertion 强度、缩小随机测试范围或忽略 Warning / Error。
+
+如果 Verilator 与 Icarus 结果不一致，必须标记：
+
+CROSS-SIM FAIL
+
+在完成原因分析之前，不得宣布模块验证通过。
+
+Yosys 只能提供独立 Synthesis Sanity，不能替代 TangDynasty。
+
+只有真实 TangDynasty 报告可以支持 Vendor Synthesis / Timing / Bitstream 结论。
+
+只有真实 HX4S20C 开发板测试可以标记 HARDWARE PASS。
+
+---
+
+## 13. Core Engineering Principle
 
 Understand First.
 
