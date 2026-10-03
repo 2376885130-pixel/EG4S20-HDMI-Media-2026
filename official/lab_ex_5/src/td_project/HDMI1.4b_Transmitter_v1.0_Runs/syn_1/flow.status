@@ -1,0 +1,23 @@
+Location         : D:\fpga_td_project\lab_ex5_i2s\src\td_project\HDMI1.4b_Transmitter_v1.0_Runs\syn_1
+Running with     : Tang Dynasty v6.2.168116
+                   Copyright (c) 2012-2025 Anlogic Inc.
+Top Model        : top
+Device           : EG4S20BG256
+Speed            : NA
+
+Timing Mode      : basic
+Setup            : WNS -5291ps  TNS  -267993ps  NUM_FEPS    92
+Hold             : WNS   471ps  TNS        0ps  NUM_FEPS     0
+
+Flow Statistics  :
+--------------------------------------------------------------------------------------------------
+     command     |  #calls  |  wall time  |  cpu time(s)  |  used memory(mb)  |  peak memory(mb)  
+--------------------------------------------------------------------------------------------------
+  optimize_gate  |    1     |   9s(52%)   |    8(53%)     |        302        |        302        
+  optimize_rtl   |    1     |   8s(47%)   |    7(46%)     |        250        |        270        
+  import_device  |    1     |   0s(0%)    |     0(0%)     |        83         |        83         
+    read_adc     |    1     |   0s(0%)    |     0(0%)     |        181        |        181        
+    read_sdc     |    3     |   0s(0%)    |     0(0%)     |        181        |        181        
+--------------------------------------------------------------------------------------------------
+      total      |    7     |     17s     |      15       |        302        |        302        
+--------------------------------------------------------------------------------------------------
