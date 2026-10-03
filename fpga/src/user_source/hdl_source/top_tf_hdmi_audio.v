@@ -84,15 +84,19 @@ wire de_0;
 // HDMI 1.4b 音频发射相关
 wire        audio_pll_lock;
 wire        audio_mclk;
-wire        audio_i2s_bclk;
-wire        audio_i2s_lrck;
-wire        audio_i2s_dout;
 wire        audio_valid;
 wire [23:0] audio_left_data;
 wire [23:0] audio_right_data;
 wire        acr_valid;
 wire [19:0] acr_cts;
 wire [19:0] acr_n;
+
+// 媒体音调联动（pcm_media_tone）：复用像素时钟，输出16位PCM，左移8位到24位接入HDMI
+wire               media_sample_valid;
+wire signed [15:0] media_sample_left;
+wire signed [15:0] media_sample_right;
+wire [1:0]         media_id;              // 当前图片ID 0..3（由 state_code 跨时钟域同步而来）
+wire [7:0]         media_volume = 8'h10;  // 音量 0~255（完赛工程由持久化配置提供，这里先用固定值96，约减半）
 
 wire        axis_s_user;
 wire        axis_s_valid;
@@ -288,28 +292,42 @@ sdram U3(
     .Sdr_rd_dout       (Sdr_rd_dout)
 );
 
-// ===================== 音频：内部 I2S 测试音 =====================
-hdmi_audio_tone_i2s_64fs #(
-    .PHASE_INC (32'd39370534),
-    .AMP       (24'sd2000000)
-) u_hdmi_audio_tone_i2s_64fs (
-    .I_mclk      (audio_mclk),
-    .I_rst       (rst_all),
-    .O_i2s_BCLK  (audio_i2s_bclk),
-    .O_i2s_LRCK  (audio_i2s_lrck),
-    .O_i2s_DOUT  (audio_i2s_dout)
+// ===================== 音频：媒体音调联动（pcm_media_tone） =====================
+// state_code = img_idx+1（1~4）在 sd_card_clk 域，跨时钟域同步到 video_clk 域得到 media_id
+reg [3:0] state_code_sync0;
+reg [3:0] state_code_sync1;
+always @(posedge video_clk or posedge rst_all) begin
+    if (rst_all) begin
+        state_code_sync0 <= 4'd0;
+        state_code_sync1 <= 4'd0;
+    end else begin
+        state_code_sync0 <= state_code;
+        state_code_sync1 <= state_code_sync0;
+    end
+end
+// 首图未提交（state_code=0）时钳位为0，否则 media_id = state_code-1 = img_idx（0~3）
+assign media_id = (state_code_sync1 == 4'd0) ? 2'd0 : (state_code_sync1[1:0] - 2'd1);
+
+pcm_media_tone #(
+    .CLOCK_HZ  (25_000_000),
+    .SAMPLE_HZ (48_000)
+) u_pcm_media_tone (
+    .clk          (video_clk),
+    .rst_n        (~rst_all),
+    .media_id     (media_id),
+    .volume       (media_volume),
+    .sample_valid (media_sample_valid),
+    .sample_ready (1'b1),                 // HDMI发射器内部FIFO无背压，始终可接收
+    .sample_left  (media_sample_left),
+    .sample_right (media_sample_right),
+    .overflow     (),
+    .blip_active  ()
 );
 
-I2S_receiver u_I2S_receiver(
-    .I_clk              (video_clk),
-    .I_rst              (rst_all),
-    .I_i2s_BCLK         (audio_i2s_bclk),
-    .I_i2s_LRCK         (audio_i2s_lrck),
-    .I_i2s_DOUT         (audio_i2s_dout),
-    .O_audio_valid      (audio_valid),
-    .O_audio_left_data  (audio_left_data),
-    .O_audio_right_data (audio_right_data)
-);
+// 16位PCM左移8位到24位（保持幅度），接入HDMI发射器的24位音频口
+assign audio_valid       = media_sample_valid;
+assign audio_left_data   = {media_sample_left,  8'b0};
+assign audio_right_data  = {media_sample_right, 8'b0};
 
 audio_arc_calculate #(
     .ACR_N         (6144)
